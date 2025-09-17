@@ -13,6 +13,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Run Tests
-        run: go test ./...
+      - name: Run tests with coverage
+  run: go test -cover ./...
 

@@ -1,5 +1,3 @@
-- name: Show Go version
-  run: go version
 name: ci
 
 on:
@@ -20,6 +18,6 @@ jobs:
         with:
           go-version: "1.25.1"
 
-      - name: Force Failure
-        run: (exit 1)
+      - name: Show Go version
+        run: go version
 

@@ -1,3 +1,5 @@
+- name: Show Go version
+  run: go version
 name: ci
 
 on:

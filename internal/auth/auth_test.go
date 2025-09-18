@@ -38,5 +38,3 @@ func TestGetAPIKey_MalformedHeader(t *testing.T) {
 		t.Fatalf("Expected error for malformed header, got nil")
 	}
 }
-
-

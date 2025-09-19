@@ -21,13 +21,11 @@ func TestGetAPIKey(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// CREATE a proper *http.Request object
 			req, _ := http.NewRequest("GET", "/", nil)
 			if tc.headerVal != "" {
 				req.Header.Set("Authorization", tc.headerVal)
 			}
 
-			// PASS the request itself
 			got, err := GetAPIKey(req)
 			if tc.wantErr {
 				if err == nil {

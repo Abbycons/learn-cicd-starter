@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time" // ✅ needed for ReadHeaderTimeout
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -39,20 +39,19 @@ func main() {
 	apiCfg := apiConfig{}
 
 	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		log.Println("DATABASE_URL environment variable is not set")
-		log.Println("Running without CRUD endpoints")
-	} else {
+	if dbURL != "" {
 		db, err := sql.Open("libsql", dbURL)
 		if err != nil {
 			log.Fatal(err)
 		}
 		apiCfg.DB = database.New(db)
 		log.Println("Connected to database!")
+	} else {
+		log.Println("DATABASE_URL environment variable is not set")
+		log.Println("Running without CRUD endpoints")
 	}
 
 	router := chi.NewRouter()
-
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -75,7 +74,6 @@ func main() {
 	})
 
 	v1Router := chi.NewRouter()
-
 	if apiCfg.DB != nil {
 		v1Router.Post("/users", apiCfg.handlerUsersCreate)
 		v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerUsersGet))
@@ -86,12 +84,10 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness)
 
 	router.Mount("/v1", v1Router)
-
-	// ✅ Fix for G112 Slowloris attack
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           router,
-		ReadHeaderTimeout: 5 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second, // ✅ Security fix
 	}
 
 	log.Printf("Serving on port: %s\n", port)

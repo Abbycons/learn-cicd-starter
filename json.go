@@ -5,14 +5,13 @@ import (
 	"net/http"
 )
 
-// respondWithJSON sends a JSON response with status code
+// respondWithJSON sends a JSON response
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	dat, err := json.Marshal(payload)
 	if err != nil {
-		http.Error(w, "failed to marshal JSON", http.StatusInternalServerError)
+		http.Error(w, "failed to marshal response", http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	if _, err := w.Write(dat); err != nil {
@@ -20,12 +19,7 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 }
 
-// respondWithError sends an error message (and optional error details) as JSON
-func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
-	errorMessage := msg
-	if err != nil {
-		errorMessage = msg + ": " + err.Error()
-	}
-
-	respondWithJSON(w, code, map[string]string{"error": errorMessage})
+// respondWithError sends an error message as JSON
+func respondWithError(w http.ResponseWriter, code int, msg string) {
+	respondWithJSON(w, code, map[string]string{"error": msg})
 }

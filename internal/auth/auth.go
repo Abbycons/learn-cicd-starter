@@ -27,4 +27,3 @@ func GetAPIKey(r *http.Request) (string, error) {
 
 	return token, nil
 }
-

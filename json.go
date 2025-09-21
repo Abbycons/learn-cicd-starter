@@ -2,33 +2,30 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
-func respondWithError(w http.ResponseWriter, code int, msg string, logErr error) {
-	if logErr != nil {
-		log.Println(logErr)
-	}
-	if code > 499 {
-		log.Printf("Responding with 5XX error: %s", msg)
-	}
-	type errorResponse struct {
-		Error string `json:"error"`
-	}
-	respondWithJSON(w, code, errorResponse{
-		Error: msg,
-	})
-}
-
+// respondWithJSON sends a JSON response with status code
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	w.Header().Set("Content-Type", "application/json")
 	dat, err := json.Marshal(payload)
 	if err != nil {
-		log.Printf("Error marshalling JSON: %s", err)
-		w.WriteHeader(500)
+		http.Error(w, "failed to marshal JSON", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Write(dat)
+	if _, err := w.Write(dat); err != nil {
+		http.Error(w, "failed to write response", http.StatusInternalServerError)
+	}
+}
+
+// respondWithError sends an error message (and optional error details) as JSON
+func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
+	errorMessage := msg
+	if err != nil {
+		errorMessage = msg + ": " + err.Error()
+	}
+
+	respondWithJSON(w, code, map[string]string{"error": errorMessage})
 }

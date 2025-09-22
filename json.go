@@ -15,17 +15,13 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
+	// ✅ Check error from Write
 	if _, err := w.Write(dat); err != nil {
 		http.Error(w, "failed to write response", http.StatusInternalServerError)
 	}
 }
 
 // respondWithError sends an error message (and optional error details) as JSON
-// Signature accepts an error argument so handler calls like:
-//
-//	respondWithError(w, http.StatusBadRequest, "message", err)
-//
-// will work.
 func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	errorMessage := msg
 	if err != nil {

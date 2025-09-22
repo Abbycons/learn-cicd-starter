@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
+	"time" // make sure this is imported
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -39,16 +39,17 @@ func main() {
 	apiCfg := apiConfig{}
 
 	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL != "" {
+	if dbURL == "" {
+		log.Println("DATABASE_URL environment variable is not set")
+		log.Println("Running without CRUD endpoints")
+	} else {
 		db, err := sql.Open("libsql", dbURL)
 		if err != nil {
 			log.Fatal(err)
 		}
-		apiCfg.DB = database.New(db)
+		dbQueries := database.New(db)
+		apiCfg.DB = dbQueries
 		log.Println("Connected to database!")
-	} else {
-		log.Println("DATABASE_URL environment variable is not set")
-		log.Println("Running without CRUD endpoints")
 	}
 
 	router := chi.NewRouter()
@@ -74,6 +75,7 @@ func main() {
 	})
 
 	v1Router := chi.NewRouter()
+
 	if apiCfg.DB != nil {
 		v1Router.Post("/users", apiCfg.handlerUsersCreate)
 		v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerUsersGet))
@@ -84,10 +86,12 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness)
 
 	router.Mount("/v1", v1Router)
+
+	// ✅ Add ReadHeaderTimeout to fix G112
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           router,
-		ReadHeaderTimeout: 5 * time.Second, // ✅ Security fix
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	log.Printf("Serving on port: %s\n", port)

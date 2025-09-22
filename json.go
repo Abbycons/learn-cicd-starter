@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// respondWithJSON sends a JSON response with status code
+// respondWithJSON sends a JSON response with a given status code
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	dat, err := json.Marshal(payload)
 	if err != nil {
@@ -20,16 +20,17 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 }
 
-// respondWithError sends an error message (and optional error details) as JSON
-// Signature accepts an error argument so handler calls like:
+// respondWithError sends an error message as JSON
+// This version accepts an optional error argument so handler calls like:
 //
 //	respondWithError(w, http.StatusBadRequest, "message", err)
 //
-// will work.
+// will work without breaking other code.
 func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	errorMessage := msg
 	if err != nil {
 		errorMessage = msg + ": " + err.Error()
 	}
+
 	respondWithJSON(w, code, map[string]string{"error": errorMessage})
 }

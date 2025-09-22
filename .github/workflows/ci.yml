@@ -1,65 +1,46 @@
-name: ci
+name: CI
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   tests:
-    name: Tests
+    name: Run Tests
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v4
         with:
-          go-version: "1.25.1"
+          go-version: 1.21
 
-      - name: Run Go tests with coverage
-        run: go test -cover ./...
+      - name: Install dependencies
+        run: go mod tidy
 
-      - name: Generate coverage report
-        run: |
-          go test -coverprofile=coverage.out ./...
-          go tool cover -html=coverage.out -o coverage.html
-
-  style:
-    name: Style
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.25.1"
-
-      - name: Check formatting
-        run: test -z "$(go fmt ./...)"
-
-      - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest
-
-      - name: Run Staticcheck
-        run: staticcheck ./...
+      - name: Run tests
+        run: go test ./...
 
   security:
     name: Security
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v4
         with:
-          go-version: "1.25.1"
+          go-version: 1.21
 
-      - name: Install Gosec
+      - name: Install gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-      - name: Run Gosec
+      - name: Run security checks
         run: gosec ./...

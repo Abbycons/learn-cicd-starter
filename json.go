@@ -9,7 +9,7 @@ import (
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	dat, err := json.Marshal(payload)
 	if err != nil {
-		http.Error(w, "failed to marshal JSON", http.StatusInternalServerError)
+		http.Error(w, "failed to marshal JSON response", http.StatusInternalServerError)
 		return
 	}
 
@@ -21,11 +21,15 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 // respondWithError sends an error message (and optional error details) as JSON
+// Signature accepts an error argument so handler calls like:
+//
+//	respondWithError(w, http.StatusBadRequest, "message", err)
+//
+// will work.
 func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	errorMessage := msg
 	if err != nil {
 		errorMessage = msg + ": " + err.Error()
 	}
-
 	respondWithJSON(w, code, map[string]string{"error": errorMessage})
 }

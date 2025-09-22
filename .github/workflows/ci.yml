@@ -8,6 +8,7 @@ on:
 
 jobs:
   tests:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -24,6 +25,19 @@ jobs:
 
       - name: Run tests
         run: go test ./...
+
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
 
       - name: Install gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest

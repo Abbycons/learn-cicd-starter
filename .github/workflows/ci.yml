@@ -1,16 +1,16 @@
 name: CI
 
-# Trigger workflow on pushes to main and on pull requests targeting main
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
 
 jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -20,18 +20,24 @@ jobs:
         with:
           go-version: "1.25.1"
 
-      - name: Run Go tests
-        run: go test ./...
+      - name: Run Go tests with coverage
+        run: go test -cover ./...
+
+      - name: Generate coverage report
+        run: |
+          go test -coverprofile=coverage.out ./...
+          go tool cover -html=coverage.out -o coverage.html
 
       - name: Install gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-      - name: Run gosec security scan
+      - name: Run gosec
         run: gosec ./...
 
   style:
     name: Style
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -47,6 +53,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4

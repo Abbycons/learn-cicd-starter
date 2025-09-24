@@ -1,14 +1,7 @@
-# Builder stage
-FROM golang:1.25-alpine AS builder
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
-RUN GOOS=linux GOARCH=arm64 go build -o notely .
+FROM --platform=linux/amd64 debian:stable-slim
 
-# Final stage
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/notely .
-EXPOSE 8080
-CMD ["./notely"]
+RUN apt-get update && apt-get install -y ca-certificates
+
+ADD notely /usr/bin/notely
+
+CMD ["notely"]

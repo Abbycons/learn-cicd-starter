@@ -4,7 +4,8 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN GOOS=linux GOARCH=arm64 go build -o notely .
+# Build for amd64 (Railway servers)
+RUN GOOS=linux GOARCH=amd64 go build -o notely .
 
 # Final stage
 FROM alpine:latest

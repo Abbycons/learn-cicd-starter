@@ -1,39 +1,37 @@
-name: Continuous Deployment
+name: CD - Notely Docker
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
+      # Checkout repository
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      # Step 2: Set up Go
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.25.1"
-
-      # Step 3: Build the Go app
-      - name: Build app
-        run: ./scripts/buildprod.sh
-
-      # Step 4: Log in to Docker Hub (uses your repo secrets)
-      - name: Docker Hub login
+      # Log in to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 5: Build Docker image
+      # Build Docker image
       - name: Build Docker image
         run: docker build -t abicons/notely:latest .
 
-      # Step 6: Push Docker image to Docker Hub
+      # Push Docker image
       - name: Push Docker image
         run: docker push abicons/notely:latest
+
+      # Optional: Deploy to Railway (if Railway CLI is set up)
+      # - name: Deploy to Railway
+      #   run: |
+      #     railway up --environment production
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
